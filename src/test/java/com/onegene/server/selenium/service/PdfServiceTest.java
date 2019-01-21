@@ -42,4 +42,12 @@ public class PdfServiceTest {
         newList.forEach(System.out::println);
 
     }
+
+    @Test
+    public void testList() {
+        List<String> lists = new ArrayList<>();
+
+        lists.addAll(new ArrayList<>());
+        lists.forEach(System.out::println);
+    }
 }

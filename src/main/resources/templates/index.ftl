@@ -41,7 +41,7 @@
         <button type="button" class="btn btn-primary" id="generatePdf" >生成PDF</button>
         <div class="progress-wrapper" style="display:none">
             <div class="progress" >
-                <div class="progress-bar progress-bar-success progress-bar-striped"  role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                <div class="progress-bar progress-bar-success progress-bar-striped active" id="progress"  role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                     <span class="sr-only">40% Complete (success)</span>
                 </div>
             </div>
@@ -49,77 +49,52 @@
     </div>
     <div class="content">
         <table class="table table-hover table-bordered">
-            <caption>悬停表格布局</caption>
+            <caption>待导入的数据（总数据量为：${page.total}）</caption>
             <thead>
             <tr>
-                <th>名称</th>
-                <th>城市</th>
-                <th>邮编</th>
+                <th>套餐</th>
+                <th>条码</th>
+                <th>链接</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>Tanmay</td>
-                <td>Bangalore</td>
-                <td>560001</td>
-            </tr>
-            <tr>
-                <td>Sachin</td>
-                <td>Mumbai</td>
-                <td>400003</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
-            <tr>
-                <td>Uma</td>
-                <td>Pune</td>
-                <td>411027</td>
-            </tr>
+            <#list page.content as sample>
+                <tr>
+                    <td>${sample.name}</td>
+                    <td>${sample.code}</td>
+                    <td>${sample.url}</td>
+                </tr>
+            </#list>
             </tbody>
         </table>
+
+        <#if page.totalPages gt 1>
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                <#--<li>
+                    <a href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>-->
+                <#list 1 .. page.totalPages as i>
+                    <#if page.pageable.pageNumber == i>
+                        <li class="active"><a href="${base}/?pageNumber=${i}">${i}</a></li>
+                    <#else>
+                    <li><a href="${base}/?pageNumber=${i}">${i}</a></li>
+                    </#if>
+                </#list>
+                <#--<li>
+                    <a href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>-->
+
+                </ul>
+            </nav>
+
+        </#if>
+
+        <#--<#include "include/pagination.ftl">-->
     </div>
 </div>
 
@@ -167,32 +142,21 @@
 
 <script>
 
-    var partnetId=0;
     $(document).ready(function(){
 
         $("#generatePdf").click(function () {
             $.ajax({
                 url:"${base}/generate/pdf",
-                type:"post",
-                dataType:"json",
-                timeout : 100000,
-                beforeSend:function () {
-                    showProgressbar()
-                },
-                complete:function () {
-                    hideProgressbar()
-                },
+                type:"get",
+                timeout : 100,
                 success:function(result){
-                    layer.alert('导出成功！', {
-                        icon: 1,
-                        skin: 'layer-ext-moon' //该皮肤由layer.seaning.com友情扩展。关于皮肤的扩展规则，去这里查阅
-                    })
+                    showProgressbar(result.uuid)
                 },
                 error:function(XMLHttpRequest, textStatus, errorThrown){
-                    layer.alert('导出失败！', {
+                    /*layer.alert('导出失败！', {
                         icon: 2,
                         skin: 'layer-ext-moon' //该皮肤由layer.seaning.com友情扩展。关于皮肤的扩展规则，去这里查阅
-                    })
+                    })*/
                 }
             });
         });
@@ -201,7 +165,7 @@
 
     });
 
-    function showProgressbar() {
+    function showProgressbar(uuid) {
         $(".progress-wrapper").css("display", "block")
 
         window.setTimeout(function () {
@@ -209,11 +173,18 @@
                 $.ajax({
                     type: 'get',
                     dataType: 'json',
-                    url: "${base}/pdf/progress",
+                    url: "${base}/pdf/progress?uuid=" + uuid,
+                    xhrFields: {
+                        withCredentials: true
+                    },
                     success: function (data) {
-                        $("#progress").text(data.percentText);
-                        $("#progress").css("width",data.percentText);
-                        if (data.curCount ==  data.totalCount) {
+                        $(".progress-bar").text(data.percentText);
+                        $(".progress-bar").css("width",data.percentText);
+                        console.log("data.curCount："+data.curCount + ",data.totalCount:" + data.totalCount)
+                        if (data.curCount != null && data.totalCount != null && data.totalCount != 0  && (data.curCount ==  data.totalCount)) {
+                            console.log("data.curCount："+data.curCount + ",data.totalCount:" + data.totalCount)
+                            $("#progress").removeClass("active")
+                            window.clearInterval(timer);
                             // hideProgressbar()
                         }
 
@@ -231,8 +202,9 @@
                     error: function (data) {
                     }
                 });
-            }, 500);
-        }, 500);
+            }, 1000);
+        }, 1000
+        );
     }
 
     function hideProgressbar() {

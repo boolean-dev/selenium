@@ -1,33 +1,27 @@
 package com.onegene.server.selenium.service;
 
+import com.onegene.server.selenium.entity.Progress;
 import com.onegene.server.selenium.entity.Sample;
 import com.onegene.server.selenium.utils.SeleniumUtils;
-import com.pdfcrowd.Pdfcrowd;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.*;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.server.handler.interactions.touch.Up;
+import org.redisson.api.RAtomicDouble;
+import org.redisson.api.RAtomicLong;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.security.Key;
-import java.text.DateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName PdfService
@@ -42,47 +36,63 @@ public class PdfService {
     @Autowired
     private SampleService sampleService;
 
+    @Autowired
+    private RedissonClient redisson;
+
     public static final String URL = "http://report.1genehealth.com/static/report_adult_2018bx-V1_print/index.html?sampleCode=189874042103&tdsourcetag=s_pctim_aiomsg";
 
-    private WebDriver webDriver = null;
 
-    private String currentWin = null;
-
-    public void pdfExport(HttpServletRequest request) throws InterruptedException, IOException, AWTException {
+    @Async
+    public void pdfExport(String uuid){
 
 
-        webDriver = SeleniumUtils.openAccess();
-
+        WebDriver webDriver = SeleniumUtils.openAccess();
         List<Sample> samples = sampleService.findAll();
-        HashMap<String, Object> map = null;
-        HttpSession session = null;
+        RAtomicLong totalCount = redisson.getAtomicLong("pdf-progress-totalCount:" + uuid);
+        totalCount.expire(1, TimeUnit.DAYS);
+        totalCount.set(samples.size());
+
+        RAtomicLong curCount = redisson.getAtomicLong("pdf-progress-curCount:" + uuid);
+        curCount.expire(1, TimeUnit.DAYS);
+        curCount.set(0);
+
+        RAtomicDouble percent = redisson.getAtomicDouble("pdf-progress-percent:" + uuid);
+        percent.expire(1, TimeUnit.DAYS);
+        percent.set(0.0);
+
+        RBucket<String> percentText = redisson.getBucket("pdf-progress-percentText:" + uuid);
+        percentText.expire(1, TimeUnit.DAYS);
+        percentText.set("0%");
+
         try {
-            session = request.getSession();
-            session.setAttribute("totalCount", samples.size());
-            session.setAttribute("curCount", 0);
-            session.setAttribute("percent", 0.00d);
-            session.setAttribute("percentText", "0%");
-        } catch (Exception e) {
+            for (int i = 0; i < samples.size(); i++) {
+                getHtml(webDriver ,samples.get(i));
+                sampleService.updateSample(samples.get(i));
+                curCount.addAndGet(1);
+                BigDecimal percentValue = new BigDecimal((i+1.0)/totalCount.get()).setScale(2,BigDecimal.ROUND_HALF_UP);
+                percent.set(percentValue.doubleValue());
+                percentText.set(percentValue.multiply(new BigDecimal(100)) + "%");
+            }
+        } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (AWTException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            webDriver.close();
         }
 
-        for (int i = 0; i < samples.size(); i++) {
-            this.getHtml(samples.get(i));
-            session = request.getSession();
-            int totalCount = (int) session.getAttribute("totalCount");
-            session.setAttribute("curCount", i+1);
-            double percent = new BigDecimal((i+1.0)/totalCount).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
-            session.setAttribute("percent", percent);
-            session.setAttribute("percentText",String.valueOf(percent*100) + "%");
-            log.info("-----------------------i={}",i++);
-        }
 
-        webDriver.close();
 
     }
 
-    private void getHtml(Sample sample) throws InterruptedException, AWTException, IOException {
+
+
+    private void getHtml(WebDriver webDriver, Sample sample) throws InterruptedException, AWTException, IOException {
         webDriver.get(sample.getUrl());
+
+        String currentWin = webDriver.getWindowHandle();
 
         Thread.sleep(500);
         WebElement addpBtn = webDriver.findElement(By.className("addp"));
@@ -91,11 +101,7 @@ public class PdfService {
         WebElement genLayoutBtn = webDriver.findElement(By.id("genLayout"));
         genLayoutBtn.click();
 
-        if (currentWin == null) {
-            currentWin = webDriver.getWindowHandle();
-        }
-
-
+        currentWin = webDriver.getWindowHandle();
         Set<String> handles = webDriver.getWindowHandles();
         for (String handle : handles) {
             if (currentWin.equals(handle)) continue;
@@ -108,26 +114,44 @@ public class PdfService {
         robot.keyRelease(KeyEvent.VK_P);
         robot.keyRelease(KeyEvent.VK_CONTROL);
 
-        Thread.sleep(4000);
+        Thread.sleep(7000);
         robot.keyPress(KeyEvent.VK_ENTER);
         robot.keyRelease(KeyEvent.VK_ENTER);
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
 
         Runtime runtime = Runtime.getRuntime();
-        String exeDir = System.getProperty("user.dir")+ "\\src\\main\\resources\\driver\\" + "pdf.exe";
+        String exeDir = System.getProperty("user.dir") + "\\src\\main\\resources\\driver\\" + "pdf.exe";
         log.info(sample.getCode());
         String[] commandArray = {exeDir, sample.getCode() + ".pdf"};
         runtime.exec(commandArray);
 
-        Thread.sleep(2000);
+        Thread.sleep(3000);
 
         webDriver.close();
-        webDriver = webDriver.switchTo().window(currentWin);
-
+        webDriver.switchTo().window(currentWin);
 
     }
 
 
+    public Progress progress(String uuid) {
+
+        RAtomicLong totalCount = redisson.getAtomicLong("pdf-progress-totalCount:" + uuid);
+
+        RAtomicLong curCount = redisson.getAtomicLong("pdf-progress-curCount:" + uuid);
+
+        RAtomicDouble percent = redisson.getAtomicDouble("pdf-progress-percent:" + uuid);
+
+        RBucket<String> percentText = redisson.getBucket("pdf-progress-percentText:" + uuid);
+
+        Progress progress = new Progress();
+        progress.setTotalCount(totalCount.get());
+        progress.setCurCount(curCount.get());
+        progress.setPercent(percent.get());
+        progress.setPercentText(percentText.get());
+
+
+        return progress;
+    }
 }

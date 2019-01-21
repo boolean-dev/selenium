@@ -4,3 +4,7 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/test
+
+redisson:
+  uri: redis://:root123456@39.108.216.235:6379?db=2
+

@@ -47,7 +47,6 @@ public class FileController {
 
 
         Workbook workbook = new XSSFWorkbook(file.getInputStream());
-//        Workbook workbook = new HSSFWorkbook(file.getInputStream());
 
         Set<Sample> sampleSet = new HashSet<>();
         Sheet sheet1 = workbook.getSheetAt(0);

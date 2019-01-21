@@ -18,9 +18,9 @@ import java.util.Objects;
  **/
 @Data
 @Document(collection = "tb_sample_pdf")
-@CompoundIndexes({
+/*@CompoundIndexes({
         @CompoundIndex(name = "code_index", def = "{'code':1,'isExport':1}", unique = true)
-})
+})*/
 public class Sample {
 
     protected static GlobalId globalId = new GlobalId(0L, 0L);
