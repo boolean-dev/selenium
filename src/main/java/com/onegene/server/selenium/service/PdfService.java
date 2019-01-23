@@ -2,6 +2,7 @@ package com.onegene.server.selenium.service;
 
 import com.onegene.server.selenium.entity.Progress;
 import com.onegene.server.selenium.entity.Sample;
+import com.onegene.server.selenium.utils.DriverPathUtils;
 import com.onegene.server.selenium.utils.SeleniumUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
@@ -39,7 +40,7 @@ public class PdfService {
     @Autowired
     private RedissonClient redisson;
 
-    public static final String URL = "http://report.1genehealth.com/static/report_adult_2018bx-V1_print/index.html?sampleCode=189874042103&tdsourcetag=s_pctim_aiomsg";
+//    public static final String URL = "http://report.1genehealth.com/static/report_adult_2018bx-V1_print/index.html?sampleCode=189874042103&tdsourcetag=s_pctim_aiomsg";
 
 
     @Async
@@ -66,6 +67,7 @@ public class PdfService {
 
         try {
             for (int i = 0; i < samples.size(); i++) {
+                Thread.sleep(100);
                 getHtml(webDriver ,samples.get(i));
                 sampleService.updateSample(samples.get(i));
                 curCount.addAndGet(1);
@@ -90,6 +92,7 @@ public class PdfService {
 
 
     private void getHtml(WebDriver webDriver, Sample sample) throws InterruptedException, AWTException, IOException {
+        log.info("样本的url={}",sample.getUrl());
         webDriver.get(sample.getUrl());
 
         String currentWin = webDriver.getWindowHandle();
@@ -98,6 +101,7 @@ public class PdfService {
         WebElement addpBtn = webDriver.findElement(By.className("addp"));
         addpBtn.click();
 
+        Thread.sleep(500);
         WebElement genLayoutBtn = webDriver.findElement(By.id("genLayout"));
         genLayoutBtn.click();
 
@@ -122,9 +126,9 @@ public class PdfService {
 
 
         Runtime runtime = Runtime.getRuntime();
-        String exeDir = System.getProperty("user.dir") + "\\src\\main\\resources\\driver\\" + "pdf.exe";
+//        String exeDir = System.getProperty("user.dir") + "\\src\\main\\resources\\driver\\" + "pdf.exe";
         log.info(sample.getCode());
-        String[] commandArray = {exeDir, sample.getCode() + ".pdf"};
+        String[] commandArray = {DriverPathUtils.getPath() + "pdf.exe", sample.getCode() + ".pdf"};
         runtime.exec(commandArray);
 
         Thread.sleep(3000);
