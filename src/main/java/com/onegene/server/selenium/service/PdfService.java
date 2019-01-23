@@ -97,11 +97,11 @@ public class PdfService {
 
         String currentWin = webDriver.getWindowHandle();
 
-        Thread.sleep(500);
+        Thread.sleep(1000);
         WebElement addpBtn = webDriver.findElement(By.className("addp"));
         addpBtn.click();
 
-        Thread.sleep(500);
+        Thread.sleep(1000);
         WebElement genLayoutBtn = webDriver.findElement(By.id("genLayout"));
         genLayoutBtn.click();
 

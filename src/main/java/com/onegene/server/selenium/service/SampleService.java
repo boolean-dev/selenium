@@ -30,6 +30,11 @@ public class SampleService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    /**
+     * 保存样本信息
+     * excel导入保存所有样本信息，不去重
+     * @param samples   the sample list
+     */
     public void save(Collection<Sample> samples) {
 
         try {
@@ -43,12 +48,22 @@ public class SampleService {
     }
 
 
+    /**
+     * 查找所有的样本
+     * @return  the all sample list
+     */
     public List<Sample> findAll() {
         Query query = new Query();
         query.addCriteria(Criteria.where("isExport").is(false));
         return mongoTemplate.find(query,Sample.class);
     }
 
+    /**
+     * list-分页
+     * 查找所有的sample信息，并且分页
+     * @param pageable  分页参数
+     * @return     查找所有的sample信息，并且分页
+     */
     public Page<Sample> findPage(Pageable pageable) {
 
 
@@ -65,9 +80,24 @@ public class SampleService {
 
     }
 
+    /**
+     * 更新样本信息
+     * 如果已经导出的sample，则更新
+     * @param sample    the sample
+     */
     public void updateSample(Sample sample) {
         Update update = new Update();
         update.set("isExport", true);
         mongoTemplate.updateFirst(new Query(Criteria.where("_id").is(sample.getId())), update, Sample.class);
+    }
+
+    /**
+     * 清楚样本报告
+     * 清楚所有的样本报告，isExport置为trie
+     */
+    public void clean() {
+        Update update = new Update();
+        update.set("isExport", true);
+        mongoTemplate.updateMulti(new Query(Criteria.where("isExport").is(false)), update, Sample.class);
     }
 }

@@ -83,7 +83,8 @@ public class RedissonConfig {
                 .setAddress(uri)
                 .setTimeout(redssionProperties.getTimeout())
                 .setConnectionPoolSize(redssionProperties.getConnectionPoolSize())
-                .setConnectionMinimumIdleSize(redssionProperties.getConnectionMinimumIdleSize());
+                .setConnectionMinimumIdleSize(redssionProperties.getConnectionMinimumIdleSize())
+                .setDatabase(redssionProperties.getDatabase());
 
 
         if(!StringUtils.isEmpty(redssionProperties.getPassword())) {

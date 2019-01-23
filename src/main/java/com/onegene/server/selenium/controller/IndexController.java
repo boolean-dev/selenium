@@ -27,11 +27,27 @@ public class IndexController {
         return "index";
     }*/
 
+    /**
+     * 主页
+     * @param model model and view
+     * @param pageable  page info
+     * @return
+     */
     @RequestMapping(value = "/*", method = RequestMethod.GET)
     public String list(ModelMap model, Pageable pageable){
 
         model.addAttribute("page", sampleService.findPage(pageable));
         return "index";
+    }
+
+    /**
+     * 清除样本
+     * @return  重定向
+     */
+    @RequestMapping(value = "/sample/clean", method = RequestMethod.GET)
+    public String clean() {
+        sampleService.clean();
+        return "redirect:/";
     }
 
 

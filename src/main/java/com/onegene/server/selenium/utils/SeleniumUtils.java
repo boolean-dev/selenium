@@ -24,30 +24,25 @@ public class SeleniumUtils {
 
     private static String downloadFilepath;
 
-    public static String getDownloadFilepath()
-    {
+    public static String getDownloadFilepath() {
         return downloadFilepath;
     }
 
 
     //超时时间
-    public static void setTimeOut(long millis)
-    {
-        try
-        {
+    public static void setTimeOut(long millis) {
+        try {
             Thread.sleep(millis);
-        } catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             log.error("页面加载超时，{}", e);
         }
     }
 
 
     /*获取浏览器的连接*/
-    public static WebDriver openAccess()
-    {
+    public static WebDriver openAccess() {
 
-        System.setProperty("webdriver.chrome.driver",DriverPathUtils.getPath() + "chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", DriverPathUtils.getPath() + "chromedriver.exe");
         //在idea运行的谷歌驱动路径
         /*System.setProperty("webdriver.chrome.driver",
                 "src/main/resources/driver/chromedriver.exe");*/
@@ -70,6 +65,12 @@ public class SeleniumUtils {
         options.setExperimentalOption("prefs", chromePrefs);
         options.addArguments("--test-type");
         options.addArguments("disable-infobars");//取消Chrome正在受到自动测试软件的控制
+        /*
+        用户浏览器地址，用于加载浏览器的用户信息，
+        这一步将增加浏览器的性能消耗，
+        如果不加这一行，浏览器默认已访客模式进入浏览器，
+        可根据自己的需求来选择是否使用
+         */
         options.addArguments("user-data-dir=" + DriverPathUtils.getChromePath());
         DesiredCapabilities cap = DesiredCapabilities.chrome();
         cap.setCapability(ChromeOptions.CAPABILITY, chromeOptionsMap);
@@ -77,10 +78,8 @@ public class SeleniumUtils {
         cap.setCapability(ChromeOptions.CAPABILITY, options);
         WebDriver driver = null;
         boolean flag = true;
-        while (flag)
-        {
-            try
-            {
+        while (flag) {
+            try {
                 flag = false;
                 driver = new ChromeDriver(cap);
                 //响应时间超过8秒，则重新开启浏览器连接
@@ -88,11 +87,9 @@ public class SeleniumUtils {
                 driver.manage().window().maximize();
 //                driver.get(url);
 
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 flag = true;
-                if (driver != null)
-                {
+                if (driver != null) {
                     driver.quit();
                 }
                 log.info("wait for connection browser ");

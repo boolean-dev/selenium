@@ -16,38 +16,38 @@ public class DriverPathUtils {
 
     private static final String CHROME_PATH = "C:\\Users\\admin\\AppData\\Local\\Google\\Chrome\\User Data\\";
 
-    private static final String CHROME_PATH_PROD = "C:\\Users\\onegene-work\\AppData\\Local\\Google\\Chrome\\User Data";
+    private static final String CHROME_PATH_PROD = "C:\\Users\\onegene\\AppData\\Local\\Google\\Chrome\\User Data";
 
     /**
      *  path
      * @return  path
      */
-    /*public static final String getPath() {
+    public static final String getPath() {
         return DEV_PATH;
-    }*/
+    }
 
     /**
      * prod-path
      * @return  path
      */
-    public static final String getPath() {
+    /*public static final String getPath() {
         return PROD_PATH;
-    }
+    }*/
 
     /**
      * local
      * @return
      */
-    /*public static final String getChromePath() {
+    public static final String getChromePath() {
         return CHROME_PATH;
-    }*/
+    }
 
     /**
      * prod
      * @return path
      */
-    public static final String getChromePath() {
+    /*public static final String getChromePath() {
         return CHROME_PATH_PROD;
-    }
+    }*/
 
 }

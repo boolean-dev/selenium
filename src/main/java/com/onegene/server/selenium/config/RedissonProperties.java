@@ -7,6 +7,7 @@
 
 package com.onegene.server.selenium.config;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -16,11 +17,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author welsham on 2018/3/29.
  */
 @ConfigurationProperties(prefix = "redisson")
+@Data
 public class RedissonProperties {
 
     private int timeout = 5000;
 
     private String uri;
+
+    private int database;
 
     private String password;
 
@@ -36,7 +40,7 @@ public class RedissonProperties {
 
     private String masterName;
 
-    public int getTimeout() {
+   /* public int getTimeout() {
         return timeout;
     }
 
@@ -106,5 +110,5 @@ public class RedissonProperties {
 
     public void setConnectionMinimumIdleSize(int connectionMinimumIdleSize) {
         this.connectionMinimumIdleSize = connectionMinimumIdleSize;
-    }
+    }*/
 }

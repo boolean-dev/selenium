@@ -3,10 +3,14 @@ server:
 spring:
   data:
     mongodb:
-      uri: mongodb://onegene:onegene100@mongo.dev.1genehealth.com:27017/old_report
-#      uri: mongodb://127.0.0.1:27017/test
+#      uri: mongodb://onegene:onegene100@mongo.dev.1genehealth.com:27017/old_report
+      uri: mongodb://127.0.0.1:27017/test
 
 redisson:
-  uri: redis://:bto100@47.98.60.103:6379?db=3
+#  uri: redis://:bto100@47.98.60.103:6379
+#  database: 2
+  uri: redis://:root123456@www.booleandev.xyz:6379
+  database: 1
+
 
 

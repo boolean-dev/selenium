@@ -39,6 +39,7 @@
         <div id="picker">导入Excel表</div>
         <#--<button type="button" class="btn btn-primary" id="picker" >导入Excel表</button>-->
         <button type="button" class="btn btn-primary" id="generatePdf" >生成PDF</button>
+        <a type="button" id="clean" class="btn btn-danger" id="generatePdf" onclick="clean()">清除数据</a>
         <div class="progress-wrapper" style="display:none">
             <div class="progress" >
                 <div class="progress-bar progress-bar-success progress-bar-striped active" id="progress"  role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
@@ -48,7 +49,7 @@
         </div>
     </div>
     <div class="content">
-        <table class="table table-hover table-bordered">
+        <table class="table table-hover table-bordered ">
             <caption>待导入的数据（总数据量为：${page.total}）</caption>
             <thead>
             <tr>
@@ -83,12 +84,6 @@
                     <li><a href="${base}/?pageNumber=${i}">${i}</a></li>
                     </#if>
                 </#list>
-                <#--<li>
-                    <a href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>-->
-
                 </ul>
             </nav>
 
@@ -97,42 +92,6 @@
         <#--<#include "include/pagination.ftl">-->
     </div>
 </div>
-
-
-
-
-<#--<div class="wrapper wrapper-content animated fadeInRight">
-    <div class="row">
-        <div class="col-sm-2"></div>
-        <div class="col-sm-2 control-label">
-            <h3>导出PDF</h3>
-        </div>
-        <div class="col-sm-8 control-label"></div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-2"></div>
-        <div class="col-sm-2 btns">
-            <div id="picker" class="col-sm-6">导入Excel表</div>
-        </div>
-
-        <div class="col-sm-8"></div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-2 control-label"></div>
-        <div class="col-sm-2">
-            <input type="button" class="btn btn-primary uploadBtn" id="generatePdf" value="生成&nbsp;&nbsp;PDF" />
-        </div>
-        <div class="progress" id="progress" style="display: none">
-            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-                60%
-            </div>
-        </div>
-        <div class="col-sm-2 control-label"></div>
-    </div>
-</div>-->
-
 
 <script src="${base}/js/jquery-3.3.1.min.js"></script>
 <script src="${base}/js/bootstrap.min.js"></script>
@@ -164,6 +123,24 @@
 
 
     });
+
+
+    function clean(event) {
+        // console.log(event)
+        // event.preventDefault()
+        //询问框
+
+        layer.confirm('确定要清空？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            layer.msg('已删除', {icon: 1});
+            window.location="${base}/sample/clean"
+            return true;
+
+        }, function(){
+            return false;
+        });
+    }
 
     function showProgressbar(uuid) {
         $(".progress-wrapper").css("display", "block")
@@ -246,7 +223,10 @@
             layer.alert('上传成功！', {
                 icon: 1,
                 skin: 'layer-ext-moon' //该皮肤由layer.seaning.com友情扩展。关于皮肤的扩展规则，去这里查阅
+            },function () {
+                window.location="${base}/"
             })
+
         });
 
         uploader.on( 'uploadError', function( file ) {
