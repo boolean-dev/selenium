@@ -108,7 +108,9 @@ public class PdfService {
         currentWin = webDriver.getWindowHandle();
         Set<String> handles = webDriver.getWindowHandles();
         for (String handle : handles) {
-            if (currentWin.equals(handle)) continue;
+            if (currentWin.equals(handle)) {
+                continue;
+            }
             webDriver = webDriver.switchTo().window(handle);
         }
 

@@ -22,32 +22,32 @@ public class DriverPathUtils {
      *  path
      * @return  path
      */
-    public static final String getPath() {
+   /* public static final String getPath() {
         return DEV_PATH;
-    }
+    }*/
 
     /**
      * prod-path
      * @return  path
      */
-    /*public static final String getPath() {
+    public static final String getPath() {
         return PROD_PATH;
-    }*/
+    }
 
     /**
      * local
      * @return
      */
-    public static final String getChromePath() {
+    /*public static final String getChromePath() {
         return CHROME_PATH;
-    }
+    }*/
 
     /**
      * prod
      * @return path
      */
-    /*public static final String getChromePath() {
+    public static final String getChromePath() {
         return CHROME_PATH_PROD;
-    }*/
+    }
 
 }

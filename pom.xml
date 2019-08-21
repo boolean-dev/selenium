@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.onegene.server</groupId>
 	<artifactId>selenium</artifactId>
-	<version>v1.1</version>
+	<version>v1.2</version>
 	<packaging>jar</packaging>
 	<name>selenium</name>
 	<description>Demo project for Spring Boot</description>
